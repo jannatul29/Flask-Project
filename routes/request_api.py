@@ -1,13 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for , jsonify
+#import uuid
+#from datetime import datetime, timedelta
+from flask import jsonify, abort, request, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import desc
-from flask_swagger_ui import get_swaggerui_blueprint
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/store"
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+#from validate_email import validate_email
+REQUEST_API = Blueprint('request_api', __name__)
+
+
+def get_blueprint():
+    """Return the blueprint for the main app module"""
+    return REQUEST_API
+
+REQUEST_API.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/store"
+db = SQLAlchemy(REQUEST_API)
+migrate = Migrate(REQUEST_API, db)
 
 class CarsModel(db.Model):
     __tablename__ = 'test12'
@@ -36,7 +44,7 @@ class CarsModel(db.Model):
     def __repr__(self):
         return f"<Car {self.title}>"
 
-@app.route('/')
+@REQUEST_API.route('/')
 def home_route():
     hotels = CarsModel.query.all()
     output = []
@@ -52,9 +60,8 @@ def home_route():
         output.append(data)
     return jsonify(output)
 
-@app.route('/name', methods=['GET'])
-def get_product():
-    title = request.args.get('title')
+@REQUEST_API.route('/name=<string:title>', methods=['GET'])
+def get_product(title):
     hotel2 = CarsModel.query.filter_by(title=title).all()
     output2 = []
     for hotel in hotel2:
@@ -69,9 +76,8 @@ def get_product():
         output2.append(data2)
     return jsonify(output2)
 
-@app.route('/place', methods=['GET'])
-def get_product1():
-    location = request.args.get('location')
+@REQUEST_API.route('/location=<string:location>', methods=['GET'])
+def get_product1(location):
     hotel3 = CarsModel.query.filter_by(location=location).all()
     output3 = []
     for hotel in hotel3:
@@ -86,13 +92,9 @@ def get_product1():
         output3.append(data3)
     return jsonify(output3)
 
-@app.route('/price', methods=['GET'])
+@REQUEST_API.route('/pricea', methods=['GET'])
 def get_product2():
-    sorting = request.args.get('sorting')
-    if sorting == 'asc':
-        hotel4 = CarsModel.query.order_by(CarsModel.price).all()
-    elif sorting == 'dsc':
-        hotel4 = CarsModel.query.order_by(CarsModel.price.desc()).all()
+    hotel4 = CarsModel.query.order_by(CarsModel.price).all()
     output4 = []
     for hotel in hotel4:
         data4 = {}
@@ -106,6 +108,18 @@ def get_product2():
         output4.append(data4)
     return jsonify(output4)
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@REQUEST_API.route('/price_dsc', methods=['GET'])
+def get_product3():
+    hotel5 = CarsModel.query.order_by(CarsModel.price.desc()).all()
+    output5 = []
+    for hotel in hotel5:
+        data5 = {}
+        data5['amentites'] = hotel.amenities
+        data5['location'] = hotel.location
+        data5['price'] = hotel.price
+        data5['rating'] = hotel.rating
+        data5['image'] = hotel.image
+        data5['herf'] = hotel.herf
+        data5['title'] = hotel.title
+        output5.append(data5)
+    return jsonify(output5)
