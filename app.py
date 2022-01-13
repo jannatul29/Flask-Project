@@ -70,6 +70,11 @@ def search():
     # result = db_users
     if None not in (title, location):
         hotel2 = store.query.filter_by(title=title, location=location).all()
+    elif None not in (location, sorting):
+        if sorting == 'asc':
+            hotel2 = store.query.filter_by(location=location).order_by(store.price).all()
+        elif sorting == 'dsc':
+            hotel2 = store.query.filter_by(location=location).order_by(store.price.desc()).all()
     elif title is not None:
         hotel2 = store.query.filter_by(title=title).all()
     elif location is not None:
