@@ -122,6 +122,16 @@
                     }
                   },
                   {
+                    "name": "price",
+                    "in": "query",
+                    "description": "Give price",
+                    "required": false,
+                    "type": "string",
+                    "schema" : {
+                        "$ref": "#/components/schemas/store/properties/price"
+                    }
+                  },
+                  {
                     "name": "sorting",
                     "in": "query",
                     "description": "price(asc for Ascending or dsc for Descending)",

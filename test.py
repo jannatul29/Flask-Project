@@ -60,6 +60,8 @@ def search():
     args = request.args
     title = args.get('title')
     location = args.get('location')
+    price = args.get('price')
+    pr = "%{}%".format(price)
     amenities = args.get('amenities')
     search = "%{}%".format(amenities)
     sorting = args.get('sorting')
@@ -73,6 +75,8 @@ def search():
         hotel2 = store.query.filter_by(location=location).all()
     elif amenities is not None:
         hotel2 = store.query.filter(store.amenities.like(search)).all()
+    elif price is not None:
+        hotel2 = store.query.filter(store.price.like(pr)).all()
     elif sorting == 'asc' and sorting is not None:
         hotel2 = store.query.order_by(store.price).all()
     elif sorting == 'dsc' and sorting is not None:

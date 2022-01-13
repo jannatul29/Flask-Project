@@ -15,7 +15,7 @@ APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:54
 db = SQLAlchemy(APP)
 migrate = Migrate(APP, db)
 
-class CarsModel(db.Model):
+class store(db.Model):
     __tablename__ = 'test12'
 
     id = db.Column(db.INTEGER, primary_key=True)
@@ -53,122 +53,36 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     }
 )
 APP.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-### end swagger specific ###
 
-
-#APP.register_blueprint(request_api.get_blueprint())
-
-@APP.route('/')
-def home_route():
-    hotels = CarsModel.query.all()
-    output = []
-    for hotel in hotels:
-        data = {}
-        data['amentites'] = hotel.amenities
-        data['location'] = hotel.location
-        data['price'] = hotel.price
-        data['rating'] = hotel.rating
-        data['image'] = hotel.image
-        data['herf'] = hotel.herf
-        data['title'] = hotel.title
-        output.append(data)
-    return jsonify(output)
-
-# @APP.route('/name=<string:title>', methods=['GET'])
-# def get_product(title):
-#     hotel2 = CarsModel.query.filter_by(title=title).all()
-#     output2 = []
-#     for hotel in hotel2:
-#         data2 = {}
-#         data2['amentites'] = hotel.amenities
-#         data2['location'] = hotel.location
-#         data2['price'] = hotel.price
-#         data2['rating'] = hotel.rating
-#         data2['image'] = hotel.image
-#         data2['herf'] = hotel.herf
-#         data2['title'] = hotel.title
-#         output2.append(data2)
-#     return jsonify(output2)
-
-
-@APP.route('/name', methods=['GET'])
-def get_product():
-    title = request.args.get('title')
-    hotel2 = CarsModel.query.filter_by(title=title).all()
-    output2 = []
-    for hotel in hotel2:
-        data2 = {}
-        data2['amentites'] = hotel.amenities
-        data2['location'] = hotel.location
-        data2['price'] = hotel.price
-        data2['rating'] = hotel.rating
-        data2['image'] = hotel.image
-        data2['herf'] = hotel.herf
-        data2['title'] = hotel.title
-        output2.append(data2)
-    return jsonify(output2)
-
-@APP.route('/place', methods=['GET'])
-def get_product1():
-    location = request.args.get('location')
-    hotel3 = CarsModel.query.filter_by(location=location).all()
-    output3 = []
-    for hotel in hotel3:
-        data3 = {}
-        data3['amentites'] = hotel.amenities
-        data3['location'] = hotel.location
-        data3['price'] = hotel.price
-        data3['rating'] = hotel.rating
-        data3['image'] = hotel.image
-        data3['herf'] = hotel.herf
-        data3['title'] = hotel.title
-        output3.append(data3)
-    return jsonify(output3)
-
-@APP.route('/price', methods=['GET'])
-def get_product2():
-    sorting = request.args.get('sorting')
-    if sorting == 'asc':
-        hotel4 = CarsModel.query.order_by(CarsModel.price).all()
-    elif sorting == 'dsc':
-        hotel4 = CarsModel.query.order_by(CarsModel.price.desc()).all()
-    output4 = []
-    for hotel in hotel4:
-        data4 = {}
-        data4['amentites'] = hotel.amenities
-        data4['location'] = hotel.location
-        data4['price'] = hotel.price
-        data4['rating'] = hotel.rating
-        data4['image'] = hotel.image
-        data4['herf'] = hotel.herf
-        data4['title'] = hotel.title
-        output4.append(data4)
-    return jsonify(output4)
 
 @APP.route('/search', methods=['GET'])
 def search():
     args = request.args
     title = args.get('title')
     location = args.get('location')
+    price = args.get('price')
+    pr = "%{}%".format(price)
     amenities = args.get('amenities')
     search = "%{}%".format(amenities)
     sorting = args.get('sorting')
 
     # result = db_users
     if None not in (title, location):
-        hotel2 = CarsModel.query.filter_by(title=title, location=location).all()
+        hotel2 = store.query.filter_by(title=title, location=location).all()
     elif title is not None:
-        hotel2 = CarsModel.query.filter_by(title=title).all()
+        hotel2 = store.query.filter_by(title=title).all()
     elif location is not None:
-        hotel2 = CarsModel.query.filter_by(location=location).all()
+        hotel2 = store.query.filter_by(location=location).all()
     elif amenities is not None:
-        hotel2 = CarsModel.query.filter(CarsModel.amenities.like(search)).all()
+        hotel2 = store.query.filter(store.amenities.like(search)).all()
+    elif price is not None:
+        hotel2 = store.query.filter(store.price.like(pr)).all()
     elif sorting == 'asc' and sorting is not None:
-        hotel2 = CarsModel.query.order_by(CarsModel.price).all()
+        hotel2 = store.query.order_by(store.price).all()
     elif sorting == 'dsc' and sorting is not None:
-        hotel2 = CarsModel.query.order_by(CarsModel.price.desc()).all()
+        hotel2 = store.query.order_by(store.price.desc()).all()
     elif None in (title, location):
-        hotel2 = CarsModel.query.all()
+        hotel2 = store.query.all()
     output2 = []
     for hotel in hotel2:
         data2 = {}
