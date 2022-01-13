@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.0",
     "info": {
-      "description": "Code With Prince",
+      "description": "Hotel details",
       "version": "1.0.0",
-      "title": "Code With Prince Flask API Tutorial",
+      "title": "Hotel API",
       "license": {
         "name": "MIT",
         "url": "https://opensource.org/licenses/MIT"
@@ -11,8 +11,8 @@
     },
     "tags": [
       {
-        "name": "Products API",
-        "description": "Test API"
+        "name": "Hotel API",
+        "description": "Hote API"
       }
     ],
      "servers": [
