@@ -16,7 +16,8 @@ db = SQLAlchemy(APP)
 migrate = Migrate(APP, db)
 
 class store(db.Model):
-    __tablename__ = 'test12'
+    #__tablename__ = 'test12'
+    __tablename__ = 'data1'
 
     id = db.Column(db.INTEGER, primary_key=True)
     amenities = db.Column(db.String())
