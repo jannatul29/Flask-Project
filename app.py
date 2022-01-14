@@ -31,7 +31,8 @@ class Users(db.Model):
 
 class store(db.Model):
     #__tablename__ = 'test12'
-    __tablename__ = 'data1'
+    #__tablename__ = 'data1'
+    __tablename__ = 'data2'
 
     id = db.Column(db.INTEGER, primary_key=True)
     amenities = db.Column(db.String())
@@ -129,7 +130,7 @@ def login_user():
 
 
 @APP.route('/search', methods=['GET'])
-@token_required
+#@token_required
 def search():
     args = request.args
     title = args.get('title')
