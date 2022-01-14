@@ -3,17 +3,31 @@ import os
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-#from routes import request_api
 from flask import jsonify, abort, request, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import desc, and_, or_, not_
+from functools import wraps
+import uuid
+import jwt
+import datetime
+from werkzeug.security import generate_password_hash,check_password_hash
+#from flask_restplus import Api
+
 
 APP = Flask(__name__)
-
+APP.config['SECRET_KEY']='004f2af45d3a4e161a7dd2d17fdae47f'
 APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/store"
+APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(APP)
 migrate = Migrate(APP, db)
+
+class Users(db.Model):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String())
+    name = db.Column(db.String())
+    password = db.Column(db.String())
 
 class store(db.Model):
     #__tablename__ = 'test12'
@@ -43,6 +57,7 @@ class store(db.Model):
     def __repr__(self):
         return f"<Car {self.title}>"
 
+
 ### swagger specific ###
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.json'
@@ -55,8 +70,64 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
 )
 APP.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
+# authorizations = {
+#     'apikey': {
+#         'type': 'apiKey',
+#         'in': 'header',
+#         'name': 'authorization'
+#     }
+# }
+
+# api = Api(
+#     ...
+#     authorizations=authorizations,
+#     security='apikey',
+# )
+
+def token_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+       token = None
+       if 'x-access-tokens' in request.headers:
+           token = request.headers['x-access-tokens']
+ 
+       if not token:
+           return jsonify({'message': 'a valid token is missing'})
+       try:
+           
+           data = jwt.decode(token, APP.config['SECRET_KEY'], algorithms=["HS256"])
+           current_user = Users.query.filter_by(public_id=data['public_id']).first()
+       except:
+           return jsonify({'message': 'token is invalid'})
+ 
+       return f(current_user, *args, **kwargs)
+    return decorator
+
+@APP.route('/register', methods=['POST'])
+def signup_user(): 
+   data = request.get_json() 
+   hashed_password = generate_password_hash(data['password'], method='sha256')
+
+   new_user = Users(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password)
+   db.session.add(new_user) 
+   db.session.commit()   
+   return jsonify({'message': 'registered successfully'})
+
+@APP.route('/login', methods=['POST']) 
+def login_user():
+    auth = request.get_json()
+    if not auth or not auth['name'] or not auth['password']: 
+        return make_response('could not verify', 401, {'Authentication': 'login required"'}) 
+        
+    user = Users.query.filter_by(name=auth['name']).first()  
+    if check_password_hash(user.password, auth['password']):
+        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=45)}, APP.config['SECRET_KEY'], "HS256")
+        return jsonify({'token' : token})
+    return make_response('could not verify',  401, {'Authentication': '"login required"'})
+
 
 @APP.route('/search', methods=['GET'])
+#@token_required
 def search():
     args = request.args
     title = args.get('title')
@@ -66,6 +137,9 @@ def search():
     amenities = args.get('amenities')
     search = "%{}%".format(amenities)
     sorting = args.get('sorting')
+    # user = Users.query.filter_by(id=current_user.id).all()
+    # for book in user:
+    #     return jsonify(book)
 
     # result = db_users
     if None not in (title, location):
@@ -75,6 +149,18 @@ def search():
             hotel2 = store.query.filter_by(location=location).order_by(store.price).all()
         elif sorting == 'dsc':
             hotel2 = store.query.filter_by(location=location).order_by(store.price.desc()).all()
+    elif None not in (location, price, sorting):
+        if sorting == 'asc':
+            hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price).all()
+        elif sorting == 'dsc':
+            hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price.desc()).all()
+    elif None not in (location, price, amenities, sorting):
+        if sorting == 'asc':
+            hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).order_by(store.price).all()
+        elif sorting == 'dsc':
+            hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).order_by(store.price.desc()).all()
+    elif None not in (location, price, amenities):
+        hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).all()
     elif title is not None:
         hotel2 = store.query.filter_by(title=title).all()
     elif location is not None:
