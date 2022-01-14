@@ -90,6 +90,8 @@ def token_required(f):
        token = None
        if 'x-access-tokens' in request.headers:
            token = request.headers['x-access-tokens']
+    #    token1 = request.get_json()
+    #    token = token1['x-access-tokens']
  
        if not token:
            return jsonify({'message': 'a valid token is missing'})
@@ -127,7 +129,7 @@ def login_user():
 
 
 @APP.route('/search', methods=['GET'])
-#@token_required
+@token_required
 def search():
     args = request.args
     title = args.get('title')
