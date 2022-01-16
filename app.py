@@ -214,7 +214,7 @@ def search():
             hotel2 = store.query.order_by(store.price).all()
         elif sorting == 'dsc' and sorting is not None:
             hotel2 = store.query.order_by(store.price.desc()).all()
-        elif None in (title, location):
+        elif None in (title, location, price, amenities, sorting):
             hotel2 = store.query.all()
         try:     
             data = jwt.decode(token, APP.config['SECRET_KEY'], algorithms=["HS256"])
