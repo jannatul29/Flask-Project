@@ -19,10 +19,11 @@ source venv/bin/activate
 # Install requirements.txt
 pip3 install -r requirements.txt
 
-# Run project: 
+# Run project 
 pyhton app.py
 
-#Project running URL: http://127.0.0.1:5000/swagger/
+#Project running URL
+http://127.0.0.1:5000/swagger/
 ```
 
 ### Using Tools and Libraries
