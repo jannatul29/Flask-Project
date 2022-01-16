@@ -25,4 +25,4 @@ pyhton app.py
 6. flask_sqlalchemy
 
 ### Project details
-This project is crawling the data from website , then those data store into Postgres database.
+This project is a API based on Flask. In order to use the API, the users have to sign up first then to generate the API key users need to sign in. Every API keys have 40 seconds of validity. After exiting 40 seconds to generate a new API key user need to sign in again.

@@ -81,7 +81,7 @@
         "/register":{
             "post": {
                 "tags": [
-                    "Signup"
+                    "Sign up"
                 ],
                 "summary": "Add user",
                 "requestBody": {
