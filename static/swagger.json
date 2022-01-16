@@ -12,7 +12,7 @@
     "tags": [
       {
         "name": "Hotel API",
-        "description": "Hote API"
+        "description": "Hote details"
       }
     ],
      "servers": [
@@ -22,13 +22,6 @@
       ],
       
          "components": {
-            "securitySchemes": {
-                "bearerAuth": {
-                  "type": "http",
-                  "scheme": "bearer",
-                  "bearerFormat": "JWT"
-                }
-              },
           "schemas": {
               "store": {
                   "type": "object",
@@ -155,38 +148,6 @@
          
           
           "/search":{
-            "post": {
-                "tags": [
-                    "Add todo to API"
-                ],
-                "summary": "Add todo",
-                "requestBody": {
-                "description": "Post New todo To Database",
-                "required": true,
-                "content": {
-                    "application/json": {
-                    "schema": {
-                        "$ref": "/"
-                        }
-                    }
-                }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                        "$ref": "#/components/schemas/store"
-                        }
-                    },
-                    "404": {
-                        "description": "NOT FOUND",
-                        "schema": {
-                        "$ref": "#/components/schemas/store"
-                        }
-                }
-                }
-                },
-  
               "get" :{
                   "tags": [
                       "Get todos from API"
@@ -198,6 +159,16 @@
                  ],
                   "summary": "Get todos",
                   "parameters": [{
+                    "name": "key",
+                    "in": "query",
+                    "description": "Give Api key",
+                    "required": true,
+                    "type": "string",
+                    "schema" : {
+                        "$ref": "#/components/schemas/store/properties/title"
+                    }
+                  },
+                  {
                     "name": "title",
                     "in": "query",
                     "description": "Give hotel's name",
@@ -263,80 +234,7 @@
                       }
               }
               }
-              },
-             
-              "put": {
-              "tags": [
-                  "Update todos on API"
-              ],
-              "parameters": [{
-                  "name": "title",
-                  "in": "path",
-                  "description": "todo id to update",
-                  "required": true,
-                  "type": "integer",
-                  "schema" : {
-                      "$ref": "#/components/schemas/store"
-                  }
-              }],
-              "summary": "Update Todo",
-              "requestBody": {
-              "description": "Update Existing todo On Database",
-              "required": true,
-              "content": {
-                  "application/json": {
-                      "schema": {
-                          "$ref": "#/components/schemas/store"
-                      }
-                  }
               }
-              },
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                      "$ref": "#/components/schemas/store"
-                      }
-                  },
-                  "404": {
-                      "description": "NOT FOUND",
-                      "schema": {
-                      "$ref": "#/components/schemas/store"
-                      }
-              }
-              }
-          },
-          "delete": {
-              "tags": [
-                  "Delete todo to API"
-              ],
-              "parameters": [{
-                  "name": "title",
-                  "in": "path",
-                  "description": "product id to delete",
-                  "required": true,
-                  "type": "integer",
-                  "schema" : {
-                      "$ref": "#/components/schemas/store"
-                  }
-              }],
-              "summary": "Delete todo",
-              
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                      "$ref": "#/components/schemas/store"
-                      }
-                  },
-                  "404": {
-                      "description": "NOT FOUND",
-                      "schema": {
-                      "$ref": "#/components/schemas/store"
-                      }
-              }
-              }
-          }
           }
   }
   }

@@ -12,12 +12,11 @@ import uuid
 import jwt
 import datetime
 from werkzeug.security import generate_password_hash,check_password_hash
-#from flask_restplus import Api
 
 
 APP = Flask(__name__)
 APP.config['SECRET_KEY']='004f2af45d3a4e161a7dd2d17fdae47f'
-APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/store"
+APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:99babama@localhost:5432/store"
 APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(APP)
 migrate = Migrate(APP, db)
@@ -30,9 +29,8 @@ class Users(db.Model):
     password = db.Column(db.String())
 
 class store(db.Model):
-    #__tablename__ = 'test12'
-    #__tablename__ = 'data1'
-    __tablename__ = 'data2'
+    __tablename__ = 'hotel'
+   # __tablename__ = 'data1'
 
     id = db.Column(db.INTEGER, primary_key=True)
     amenities = db.Column(db.String())
@@ -66,45 +64,11 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "Seans-Python-Flask-REST-Boilerplate"
+        'app_name': "Flask Api"
     }
 )
 APP.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
-# authorizations = {
-#     'apikey': {
-#         'type': 'apiKey',
-#         'in': 'header',
-#         'name': 'authorization'
-#     }
-# }
-
-# api = Api(
-#     ...
-#     authorizations=authorizations,
-#     security='apikey',
-# )
-
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-       token = None
-       if 'x-access-tokens' in request.headers:
-           token = request.headers['x-access-tokens']
-    #    token1 = request.get_json()
-    #    token = token1['x-access-tokens']
- 
-       if not token:
-           return jsonify({'message': 'a valid token is missing'})
-       try:
-           
-           data = jwt.decode(token, APP.config['SECRET_KEY'], algorithms=["HS256"])
-           current_user = Users.query.filter_by(public_id=data['public_id']).first()
-       except:
-           return jsonify({'message': 'token is invalid'})
- 
-       return f(current_user, *args, **kwargs)
-    return decorator
 
 @APP.route('/register', methods=['POST'])
 def signup_user(): 
@@ -114,7 +78,9 @@ def signup_user():
    new_user = Users(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password)
    db.session.add(new_user) 
    db.session.commit()   
-   return jsonify({'message': 'registered successfully'})
+   return jsonify({'message': 'Registered successfully'})
+
+token = 'key'
 
 @APP.route('/login', methods=['POST']) 
 def login_user():
@@ -124,15 +90,15 @@ def login_user():
         
     user = Users.query.filter_by(name=auth['name']).first()  
     if check_password_hash(user.password, auth['password']):
-        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=45)}, APP.config['SECRET_KEY'], "HS256")
-        return jsonify({'token' : token})
+        global token
+        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, APP.config['SECRET_KEY'], "HS256")
+        return jsonify({'Api key' : token})
     return make_response('could not verify',  401, {'Authentication': '"login required"'})
 
-
 @APP.route('/search', methods=['GET'])
-#@token_required
 def search():
     args = request.args
+    key = args.get('key')
     title = args.get('title')
     location = args.get('location')
     price = args.get('price')
@@ -140,58 +106,139 @@ def search():
     amenities = args.get('amenities')
     search = "%{}%".format(amenities)
     sorting = args.get('sorting')
-    # user = Users.query.filter_by(id=current_user.id).all()
-    # for book in user:
-    #     return jsonify(book)
 
-    # result = db_users
-    if None not in (title, location):
-        hotel2 = store.query.filter_by(title=title, location=location).all()
-    elif None not in (location, sorting):
-        if sorting == 'asc':
-            hotel2 = store.query.filter_by(location=location).order_by(store.price).all()
-        elif sorting == 'dsc':
-            hotel2 = store.query.filter_by(location=location).order_by(store.price.desc()).all()
-    elif None not in (location, price, sorting):
-        if sorting == 'asc':
-            hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price).all()
-        elif sorting == 'dsc':
-            hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price.desc()).all()
-    elif None not in (location, price, amenities, sorting):
-        if sorting == 'asc':
-            hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).order_by(store.price).all()
-        elif sorting == 'dsc':
-            hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).order_by(store.price.desc()).all()
-    elif None not in (location, price, amenities):
-        hotel2 = store.query.filter(store.location == location, store.amenities.like(search), store.price.like(pr)).all()
-    elif title is not None:
-        hotel2 = store.query.filter_by(title=title).all()
-    elif location is not None:
-        hotel2 = store.query.filter_by(location=location).all()
-    elif amenities is not None:
-        hotel2 = store.query.filter(store.amenities.like(search)).all()
-    elif price is not None:
-        hotel2 = store.query.filter(store.price.like(pr)).all()
-    elif sorting == 'asc' and sorting is not None:
-        hotel2 = store.query.order_by(store.price).all()
-    elif sorting == 'dsc' and sorting is not None:
-        hotel2 = store.query.order_by(store.price.desc()).all()
-    elif None in (title, location):
-        hotel2 = store.query.all()
-    elif None in (title, location):
-        hotel2 = store.query.all()
-    output2 = []
-    for hotel in hotel2:
-        data2 = {}
-        data2['amentites'] = hotel.amenities
-        data2['location'] = hotel.location
-        data2['price'] = hotel.price
-        data2['rating'] = hotel.rating
-        data2['image'] = hotel.image
-        data2['herf'] = hotel.herf
-        data2['title'] = hotel.title
-        output2.append(data2)
-    return jsonify(output2)
+    global token
+
+    if key == token :
+        # result = db_users
+        if None not in (title, location, price, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr), store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr), store.amenities.like(search)).order_by(store.price.desc()).all()
+        if None not in (title, location, price, amenities):
+            hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr), store.amenities.like(search)).all()
+        elif None not in (location, price, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.location == location, store.price.like(pr), store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.location == location, store.price.like(pr), store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif None not in (title, location, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif None not in (title, location, price, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr)).order_by(store.price.desc()).all() 
+        elif None not in (price, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.price.like(pr), store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.price.like(pr), store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif None not in (location, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.location == location, store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.location == location, store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif None not in (location, price, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.location == location, store.price.like(pr)).order_by(store.price.desc()).all()
+        elif None not in (location, price, amenities):
+            hotel2 = store.query.filter(store.location == location, store.price.like(pr), store.amenities.like(search)).all()
+        elif None not in (title, amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif None not in (title, price, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.price.like(pr)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.price.like(pr)).order_by(store.price.desc()).all()
+        elif None not in (title, price, amenities):
+            hotel2 = store.query.filter(store.title==title, store.price.like(pr), store.amenities.like(search)).all()
+        elif None not in (title, location, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title, store.location == location).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title, store.location == location).order_by(store.price.desc()).all()
+        elif None not in (title, location, amenities):
+            hotel2 = store.query.filter(store.title==title, store.location == location, store.amenities.like(search)).all()
+        elif None not in (title, location, price):
+            hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr)).all()
+        elif None not in (title, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.title==title).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.title==title).order_by(store.price.desc()).all()
+        elif None not in (title, amenities):
+            hotel2 = store.query.filter(store.title==title, store.amenities.like(search)).all()
+        elif None not in (title, price):
+            hotel2 = store.query.filter(store.title==title, store.price.like(pr)).all()   
+        elif None not in (title, location):
+            hotel2 = store.query.filter(store.title==title, store.location == location).all()
+        elif None not in (location, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.location == location).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.location == location).order_by(store.price.desc()).all()
+        elif None not in (location, amenities):
+            hotel2 = store.query.filter(store.location == location, store.amenities.like(search)).all()
+        elif None not in (location, price):
+            hotel2 = store.query.filter(store.location == location, store.price.like(pr)).all()
+        elif None not in (price, amenities):
+            hotel2 = store.query.filter(store.price.like(pr), store.amenities.like(search)).all()
+        elif None not in (price, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.price.like(pr)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.price.like(pr)).order_by(store.price.desc()).all()
+        elif None not in (amenities, sorting):
+            if sorting == 'asc':
+                hotel2 = store.query.filter(store.amenities.like(search)).order_by(store.price).all()
+            elif sorting == 'dsc':
+                hotel2 = store.query.filter(store.amenities.like(search)).order_by(store.price.desc()).all()
+        elif title is not None:
+            hotel2 = store.query.filter_by(title=title).all()
+        elif location is not None:
+            hotel2 = store.query.filter_by(location=location).all()
+        elif amenities is not None:
+            hotel2 = store.query.filter(store.amenities.like(search)).all()
+        elif price is not None:
+            hotel2 = store.query.filter(store.price.like(pr)).all()
+        elif sorting == 'asc' and sorting is not None:
+            hotel2 = store.query.order_by(store.price).all()
+        elif sorting == 'dsc' and sorting is not None:
+            hotel2 = store.query.order_by(store.price.desc()).all()
+        elif None in (title, location):
+            hotel2 = store.query.all()
+        try:     
+            data = jwt.decode(token, APP.config['SECRET_KEY'], algorithms=["HS256"])
+        except:
+            return jsonify({'message': 'Api key is invalid'})
+        output2 = []
+        for hotel in hotel2:
+            data2 = {}
+            data2['amentites'] = hotel.amenities
+            data2['location'] = hotel.location
+            data2['price'] = hotel.price
+            data2['rating'] = hotel.rating
+            data2['image'] = hotel.image
+            data2['herf'] = hotel.herf
+            data2['title'] = hotel.title
+            output2.append(data2)
+        #return jsonify(output2)
+        if output2 != []:
+            return jsonify(output2)
+        else:
+            return jsonify({'message': 'No data found'})
+    else:
+        return jsonify({'message': 'Worng api key'})
 
 
 @APP.errorhandler(400)
@@ -218,22 +265,5 @@ def handle_500_error(_error):
     return make_response(jsonify({'error': 'Server error'}), 500)
 
 
-# if __name__ == '__main__':
-
-#     PARSER = argparse.ArgumentParser(
-#         description="Seans-Python-Flask-REST-Boilerplate")
-
-#     PARSER.add_argument('--debug', action='store_true',
-#                         help="Use flask debug/dev mode with file change reloading")
-#     ARGS = PARSER.parse_args()
-
-#     PORT = int(os.environ.get('PORT', 5000))
-
-#     if ARGS.debug:
-#         print("Running in debug mode")
-#         CORS = CORS(APP)
-#         APP.run(host='0.0.0.0', port=PORT, debug=True)
-#     else:
-#         APP.run(host='0.0.0.0', port=PORT, debug=False)
 if __name__ == '__main__':
     APP.run(debug=True)
