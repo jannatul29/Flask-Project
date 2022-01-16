@@ -220,7 +220,7 @@ def search():
         try:     
             data = jwt.decode(token, APP.config['SECRET_KEY'], algorithms=["HS256"])
         except:
-            return jsonify({'message': 'Api key is invalid'})
+            return jsonify({'message': 'Api key is invalid. Please login again.'})
         output2 = []
         for hotel in hotel2:
             data2 = {}
