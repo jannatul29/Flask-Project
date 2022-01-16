@@ -91,7 +91,7 @@ def login_user():
     user = Users.query.filter_by(name=auth['name']).first()  
     if check_password_hash(user.password, auth['password']):
         global token
-        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=30)}, APP.config['SECRET_KEY'], "HS256")
+        token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=40)}, APP.config['SECRET_KEY'], "HS256")
         return jsonify({'Api key' : token})
     return make_response('could not verify',  401, {'Authentication': '"login required"'})
 
