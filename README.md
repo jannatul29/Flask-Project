@@ -7,13 +7,22 @@ https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ub
 https://kodemonk.dev/blog/installing-postgresql-on-ubuntu-20-04
 # After installing pgadmin4, please create the database which name is  "store", password will be "root", then importing hotel.sql and user.sql
 
-# install requirements.txt
+# Install virtual environment
+pip3 install virtualenv
+
+#Create a virtual environment
+virtualenv venv (you can use any name insted of venv)
+
+#Active your virtual environment
+source venv/bin/activate
+
+# Install requirements.txt
 pip3 install -r requirements.txt
 
 # Run project: 
 pyhton app.py
 
-#project running URL: http://127.0.0.1:5000/swagger/
+#Project running URL: http://127.0.0.1:5000/swagger/
 ```
 
 ### Using Tools and Libraries
