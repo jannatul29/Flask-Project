@@ -110,7 +110,6 @@ def search():
     global token
 
     if key == token :
-        # result = db_users
         if None not in (title, location, price, amenities, sorting):
             if sorting == 'asc':
                 hotel2 = store.query.filter(store.title==title, store.location == location, store.price.like(pr), store.amenities.like(search)).order_by(store.price).all()
