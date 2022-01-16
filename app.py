@@ -178,6 +178,8 @@ def search():
         hotel2 = store.query.order_by(store.price.desc()).all()
     elif None in (title, location):
         hotel2 = store.query.all()
+    elif None in (title, location):
+        hotel2 = store.query.all()
     output2 = []
     for hotel in hotel2:
         data2 = {}
