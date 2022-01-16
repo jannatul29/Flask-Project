@@ -81,11 +81,11 @@
         "/register":{
             "post": {
                 "tags": [
-                    "signUp"
+                    "Signup"
                 ],
-                "summary": "Add todo",
+                "summary": "Add user",
                 "requestBody": {
-                "description": "Post New todo To Database",
+                "description": "SignUp for accessing data",
                 "required": true,
                 "content": {
                     "application/json": {
@@ -115,11 +115,11 @@
         "/login":{
             "post": {
                 "tags": [
-                    "SignIn"
+                    "login"
                 ],
-                "summary": "Add todo",
+                "summary": "login",
                 "requestBody": {
-                "description": "Post New todo To Database",
+                "description": "Login for generating new api key",
                 "required": true,
                 "content": {
                     "application/json": {
@@ -150,14 +150,14 @@
           "/search":{
               "get" :{
                   "tags": [
-                      "Get todos from API"
+                      "Get hotel details from API"
                   ],
                   "security": [
                     {
                        "bearerAuth": []
                     }
                  ],
-                  "summary": "Get todos",
+                  "summary": "Get data",
                   "parameters": [{
                     "name": "key",
                     "in": "query",
