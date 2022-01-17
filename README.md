@@ -5,7 +5,7 @@
 https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart
 # After installing Postgres, please read the following documentation for installing pgadmin4:
 https://kodemonk.dev/blog/installing-postgresql-on-ubuntu-20-04
-# After installing pgadmin4, please create the database which name is  "store", password will be "root", then importing hotel.sql and user.sql
+# After installing pgadmin4, please create the database which name is  "store", password will be "root", then importing hotel1.sql and user.sql
 
 # Install virtual environment
 pip3 install virtualenv
