@@ -29,8 +29,8 @@ class Users(db.Model):
     password = db.Column(db.String())
 
 class store(db.Model):
-   # __tablename__ = 'hotel'
-    __tablename__ = 'data1'
+    __tablename__ = 'hotel1'
+    #__tablename__ = 'data1'
 
     id = db.Column(db.INTEGER, primary_key=True)
     amenities = db.Column(db.String())
@@ -93,8 +93,7 @@ def login_user():
         global token
         token = jwt.encode({'public_id' : user.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=40)}, APP.config['SECRET_KEY'], "HS256")
         return jsonify({'Api key' : token})
-    else:
-        return make_response('could not verify',  401, {'Authentication': '"login required"'})
+    return make_response('could not verify',  401, {'Authentication': '"login required"'})
 
 @APP.route('/search', methods=['GET'])
 def search():
