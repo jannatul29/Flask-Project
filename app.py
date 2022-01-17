@@ -29,8 +29,8 @@ class Users(db.Model):
     password = db.Column(db.String())
 
 class store(db.Model):
-   # __tablename__ = 'hotel'
-    __tablename__ = 'data1'
+    __tablename__ = 'hotel'
+    #__tablename__ = 'data1'
 
     id = db.Column(db.INTEGER, primary_key=True)
     amenities = db.Column(db.String())
