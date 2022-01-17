@@ -16,7 +16,7 @@ from werkzeug.security import generate_password_hash,check_password_hash
 
 APP = Flask(__name__)
 APP.config['SECRET_KEY']='004f2af45d3a4e161a7dd2d17fdae47f'
-APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:99babama@localhost:5432/store"
+APP.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/store"
 APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(APP)
 migrate = Migrate(APP, db)
